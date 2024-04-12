@@ -1,14 +1,23 @@
-import { Switch, Route, BrowserRouter } from 'react-router-dom';
-
+// import React from 'react';
+import { Switch, BrowserRouter } from 'react-router-dom';
 import 'rsuite/dist/styles/rsuite-default.css';
 import './styles/main.scss';
+import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
+import Home from './pages/Home';
+import SignIn from './pages/SignIn';
 
 function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/signin">SignIn</Route>
-        <Route path="/">Home</Route>
+        <PublicRoute path="/signin">
+          <SignIn />
+        </PublicRoute>
+
+        <PrivateRoute path="/">
+          <Home />
+        </PrivateRoute>
       </Switch>
     </BrowserRouter>
   );
