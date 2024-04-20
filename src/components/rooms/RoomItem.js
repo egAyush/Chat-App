@@ -12,7 +12,7 @@ const RoomItem = ({ room }) => {
           datetime={
             lastMessage ? new Date(lastMessage.createdAt) : new Date(createdAt)
           }
-          className="font-normal text-black-45"
+          className="font-normal text-black-45 "
         />
       </div>
 
