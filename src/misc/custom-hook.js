@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { database } from './firebase';
 
 export function useModelState(defaultValue = false) {
@@ -48,4 +48,27 @@ export function usePresence(uid) {
   }, [uid]);
 
   return presence;
+}
+
+export function useHover() {
+  const [isHovered, setIsHovered] = useState(false);
+  const elementRef = useRef(null); // Ensure ref is created initially
+
+  const handleMouseOver = () => setIsHovered(true);
+  const handleMouseOut = () => setIsHovered(false);
+
+  useEffect(() => {
+    const node = elementRef.current; // Access ref safely within effect
+    if (node) {
+      node.addEventListener('mouseover', handleMouseOver);
+      node.addEventListener('mouseout', handleMouseOut);
+    }
+    return () => {
+      node.removeEventListener('mouseover', handleMouseOver);
+      node.removeEventListener('mouseout', handleMouseOut);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elementRef.current]); // Re-run only if ref changes
+
+  return [elementRef, isHovered];
 }
