@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import { auth, database } from '../../../misc/firebase';
+import { auth, database, storage } from '../../../misc/firebase';
 import { transformToArrWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 import { Alert } from 'rsuite';
@@ -84,7 +84,7 @@ const Messages = () => {
   }, []);
 
   const handleDelete = useCallback(
-    async msgId => {
+    async (msgId, files) => {
       if (!window.confirm('Delete this message')) {
         return;
       }
@@ -111,7 +111,16 @@ const Messages = () => {
 
         Alert.info('Message has been deleted');
       } catch (err) {
-        Alert.error(err.message, 4000);
+        return Alert.error(err.message);
+      }
+
+      if (files) {
+        try {
+          const fileRef = storage.refFromURL(files.url);
+          await fileRef.delete();
+        } catch (err) {
+          Alert.error(err.message);
+        }
       }
     },
     [chatId, messages]
