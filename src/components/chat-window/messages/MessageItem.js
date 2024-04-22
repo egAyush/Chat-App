@@ -10,9 +10,22 @@ import { memo } from 'react';
 import { auth } from '../../../misc/firebase';
 import { useHover, useMediaQuery } from '../../../misc/custom-hook';
 import IconBtnControl from './IconBtnControl';
+import ImgBtnModal from './ImgBtnModal';
+
+const renderFileMsg = files => {
+  if (files.contentType.includes('image')) {
+    return (
+      <div className="height-220">
+        <ImgBtnModal src={files.url} fileName={files.name} />
+      </div>
+    );
+  }
+
+  return <a href={files.url}>Download {files.name}</a>;
+};
 
 const MessageItem = ({ message, handleAdmin, handleLike, handleDelete }) => {
-  const { author, createdAt, text, likes, likeCount } = message;
+  const { author, createdAt, text, files, likes, likeCount } = message;
 
   const [selfRef, isHovered] = useHover();
   const isMobile = useMediaQuery('(max-width : 992px)');
@@ -82,7 +95,9 @@ const MessageItem = ({ message, handleAdmin, handleLike, handleDelete }) => {
       </div>
 
       <div>
-        <span className="word-break-all">{text}</span>
+        {text && <span className="word-break-all">{text}</span>}
+
+        {files && renderFileMsg(files)}
       </div>
     </li>
   );
