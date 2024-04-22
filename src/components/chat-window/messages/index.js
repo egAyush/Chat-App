@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
-import { database } from '../../../misc/firebase';
+import { auth, database } from '../../../misc/firebase';
 import { transformToArrWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 import { Alert } from 'rsuite';
@@ -33,26 +33,55 @@ const Messages = () => {
   const handleAdmin = useCallback(
     async uid => {
       const adminsRef = database.ref(`/rooms/${chatId}/admins`);
-      let alerMsg;
+      let alertMsg;
 
       await adminsRef.transaction(admins => {
         if (admins) {
           if (admins[uid]) {
             admins[uid] = null;
-            alerMsg = 'Admin permission removed';
+            alertMsg = 'Admin permission removed';
           } else {
             admins[uid] = true;
-            alerMsg = 'Admin permission granted';
+            alertMsg = 'Admin permission granted';
           }
         }
 
         return admins;
       });
 
-      Alert.info(alerMsg, 4000);
+      Alert.info(alertMsg, 4000);
     },
     [chatId]
   );
+
+  const handleLike = useCallback(async msgId => {
+    const { uid } = auth.currentUser;
+    const messageRef = database.ref(`/messages/${msgId}`);
+    let alertMsg;
+
+    await messageRef.transaction(msg => {
+      if (msg) {
+        if (msg.likes && msg.likes[uid]) {
+          msg.likeCount -= 1;
+          msg.likes[uid] = null;
+          alertMsg = 'Like removed';
+        } else {
+          msg.likeCount += 1;
+          if (!msg.likes) {
+            msg.likes = {};
+          }
+
+          msg.likes[uid] = true;
+
+          alertMsg = 'like added';
+        }
+      }
+
+      return msg;
+    });
+
+    Alert.info(alertMsg, 4000);
+  }, []);
 
   return (
     <div className="msg-list custom-scroll">
@@ -60,7 +89,12 @@ const Messages = () => {
 
       {canShowMessages &&
         messages.map(msg => (
-          <MessageItem key={msg.id} message={msg} handleAdmin={handleAdmin} />
+          <MessageItem
+            key={msg.id}
+            message={msg}
+            handleAdmin={handleAdmin}
+            handleLike={handleLike}
+          />
         ))}
     </div>
   );
