@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import { Alert, Icon, Input, InputGroup } from 'rsuite';
 import { useProfile } from '../../../context/profile.context';
 import { database } from '../../../misc/firebase';
-import AttachBtnModal from './AttachBtnModal';
+import AttachmentBtnModal from './AttachmentBtnModal';
 
 function assembleMessage(profile, chatId) {
   return {
@@ -69,10 +69,44 @@ const Bottom = () => {
     }
   };
 
+  const afterUpload = useCallback(
+    async files => {
+      setIsLoading(true);
+
+      const updates = {};
+
+      files.forEach(file => {
+        const msgData = assembleMessage(profile, chatId);
+        msgData.files = file;
+
+        const messageId = database.ref('messages').push().key;
+
+        updates[`/messages/${messageId}`] = msgData;
+      });
+
+      const lastMsgId = Object.keys(updates).pop();
+
+      updates[`/rooms/${chatId}/lastMessage`] = {
+        ...updates[lastMsgId],
+        msgId: lastMsgId,
+      };
+
+      try {
+        await database.ref().update(updates);
+
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        Alert.error(error.message);
+      }
+    },
+    [chatId, profile]
+  );
+
   return (
     <div>
       <InputGroup>
-        <AttachBtnModal />
+        <AttachmentBtnModal afterUpload={afterUpload} />
         <Input
           placeholder="Write a new message here..."
           value={input}

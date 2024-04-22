@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 
 const MAX_FILE_SIZE = 1000 * 1024 * 5;
 
-const AttachBtnModal = ({ afterUpload }) => {
+const AttachmentBtnModal = ({ afterUpload }) => {
   const { chatId } = useParams();
   const { isOpen, open, close } = useModelState();
   const [fileList, setFileList] = useState([]);
@@ -94,4 +94,4 @@ const AttachBtnModal = ({ afterUpload }) => {
   );
 };
 
-export default AttachBtnModal;
+export default AttachmentBtnModal;
